@@ -22,10 +22,13 @@ object Decoders {
       Try(new URL(s))
     }
 
-  implicit val decodeExternalId: Decoder[ExternalId] =
+  private val decodeUuid: Decoder[UUID] =
     Decoder.decodeString.emapTry { s =>
-      Try(ExternalId(UUID.fromString(s)))
+      Try(UUID.fromString(s))
     }
+
+  implicit val decodeExternalId: Decoder[ExternalId] =
+    decodeUuid.map(ExternalId)
 
   implicit val decodeDomainName: Decoder[DomainName] =
     Decoder.decodeString.map(DomainName)
@@ -112,6 +115,45 @@ object Decoders {
   implicit val decodeTimezone: Decoder[Timezone] =
     Decoder.decodeString.map(Timezone)
 
+  implicit val decodeTicketId: Decoder[TicketId] =
+    decodeUuid.map(TicketId)
+
+  implicit val decodeTicketType: Decoder[TicketType] =
+    Decoder.decodeString.emap {
+      case "task" => Right(TicketType.Task)
+      case "incident" => Right(TicketType.Incident)
+      case "question" => Right(TicketType.Question)
+      case "problem" => Right(TicketType.Problem)
+      case other      => Left(s"'${other}' is not a valid ticket type")
+    }
+
+  implicit val decodePriority: Decoder[Priority] =
+    Decoder.decodeString.emap {
+      case "urgent" => Right(Priority.Urgent)
+      case "high" => Right(Priority.High)
+      case "normal" => Right(Priority.Normal)
+      case "low" => Right(Priority.Low)
+      case other      => Left(s"'${other}' is not a valid priority")
+    }
+
+  implicit val decodeStatus: Decoder[Status] =
+    Decoder.decodeString.emap {
+      case "pending" => Right(Status.Pending)
+      case "open" => Right(Status.Open)
+      case "closed" => Right(Status.Closed)
+      case "hold" => Right(Status.Hold)
+      case "solved" => Right(Status.Solved)
+      case other      => Left(s"'${other}' is not a valid status")
+    }
+
+  implicit val decodeChannel: Decoder[Channel] =
+    Decoder.decodeString.emap {
+      case "web" => Right(Channel.Web)
+      case "chat" => Right(Channel.Chat)
+      case "voice" => Right(Channel.Voice)
+      case other      => Left(s"'${other}' is not a valid channel")
+    }
+
   implicit val decodeUser: Decoder[User] = Decoder.forProduct19(
     "_id",
     "url",
@@ -132,6 +174,25 @@ object Decoders {
     "tags",
     "suspended",
     "role")(User.apply)
+
+  implicit val decodeTicket: Decoder[Ticket] = Decoder.forProduct16(
+    "_id",
+    "url",
+    "external_id",
+    "created_at",
+    "type",
+    "subject",
+    "description",
+    "priority",
+    "status",
+    "submitter_id",
+    "assignee_id",
+    "organization_id",
+    "tags",
+    "has_incidents",
+    "due_at",
+    "via"
+  )(Ticket.apply)
 
   private def filter[A](d: Decoder[A], p: A => Boolean, errorMessage: A => String) =
     d.emap { a =>

@@ -25,6 +25,16 @@ object DecodersTest extends TestSuite {
           }
         }
       }
+
+      'tickets - {
+        'decodeExampleFile - {
+          val result = TestUtil.decodeJsonResource[Vector[Ticket]]("tickets.json")
+          result match {
+            case Right(results) => assert(results.length == 200)
+            case _              => assert(false)
+          }
+        }
+      }
     }
   }
 
