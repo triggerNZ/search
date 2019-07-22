@@ -5,7 +5,22 @@ import cats.Id
 import Decoders._
 
 object App {
+  def main(args: Array[String]) = {
+    println(Tables.organizations.table(Data.organizations))
+  }
+}
 
+object Tables {
+  import TextTable.Column
+  val organizations: TextTable[Organization] =
+    TextTable(
+      Column[Organization]("Id", 4, _.id.value.toString),
+      Column[Organization]("Name", 10, _.name),
+      Column[Organization]("URL", 60, _.url.toString),
+      Column[Organization]("Domain Names", 55, _.domainNames.map(_.value).mkString(", ")),
+      Column[Organization]("Tags", 40, _.tags.map(_.value).mkString(", ")),
+      Column[Organization]("Details", 11, _.details),
+    )
 }
 
 object Data {
