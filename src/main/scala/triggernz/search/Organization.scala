@@ -4,7 +4,12 @@ import java.net.URL
 import java.time.ZonedDateTime
 import java.util.UUID
 
+import japgolly.univeq.UnivEq
+import monocle.macros.Lenses
 
+import JavaUnivEqs._
+
+@Lenses
 case class Organization(id: OrganizationId,
                         url: URL,
                         externalId: ExternalId,
@@ -15,14 +20,33 @@ case class Organization(id: OrganizationId,
                         sharedTickets: SharedTickets,
                         tags: Vector[Tag])
 
+object Organization {
+  implicit def univEq: UnivEq[Organization] = UnivEq.derive
+}
+
 case class OrganizationId(value: Long) extends AnyVal
+object OrganizationId {
+  implicit def univEq: UnivEq[OrganizationId] = UnivEq.derive
+}
+
 case class ExternalId(value: UUID) extends AnyVal
+object ExternalId {
+  implicit def univEq: UnivEq[ExternalId] = UnivEq.derive
+}
 case class DomainName(value: String) extends AnyVal
+object DomainName {
+  implicit def univEq: UnivEq[DomainName] = UnivEq.derive
+}
 
 sealed trait SharedTickets
 object SharedTickets {
   case object Enabled extends SharedTickets
   case object Disabled extends SharedTickets
+
+  implicit def univEq: UnivEq[SharedTickets] = UnivEq.derive
 }
 
 case class Tag(value: String) extends AnyVal
+object Tag {
+  implicit def univEq: UnivEq[Tag] = UnivEq.derive
+}

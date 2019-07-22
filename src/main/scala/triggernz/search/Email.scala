@@ -1,5 +1,7 @@
 package triggernz.search
 
+import japgolly.univeq.UnivEq
+
 case class Email private (username: String, domain: String)
 object Email {
   def fromString(s: String): Option[Email] = {
@@ -14,4 +16,6 @@ object Email {
     } else
       None
   }
+
+  implicit def univEq: UnivEq[Email] = UnivEq.derive
 }

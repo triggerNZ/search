@@ -8,7 +8,7 @@ object DecodersTest extends TestSuite {
     'decoders - {
       'organization - {
         'decodeExampleFile - {
-          val result = TestUtil.decodeJsonResource[Vector[Organization]]("organizations.json")
+          val result = Resources.decodeJsonResource[Vector[Organization]]("organizations.json")
           result match {
             case Right(results) => assert(results.length == 25)
             case _              => assert(false)
@@ -18,7 +18,7 @@ object DecodersTest extends TestSuite {
 
       'users - {
         'decodeExampleFile - {
-          val result = TestUtil.decodeJsonResource[Vector[User]]("users.json")
+          val result = Resources.decodeJsonResource[Vector[User]]("users.json")
           result match {
             case Right(results) => assert(results.length == 75)
             case _              => assert(false)
@@ -28,7 +28,7 @@ object DecodersTest extends TestSuite {
 
       'tickets - {
         'decodeExampleFile - {
-          val result = TestUtil.decodeJsonResource[Vector[Ticket]]("tickets.json")
+          val result = Resources.decodeJsonResource[Vector[Ticket]]("tickets.json")
           result match {
             case Right(results) => assert(results.length == 200)
             case _              => assert(false)

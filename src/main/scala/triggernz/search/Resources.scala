@@ -3,7 +3,7 @@ package triggernz.search
 import io.circe._
 
 
-object TestUtil {
+object Resources {
   // Don't handle failure. It is convenience method for tests. Failure = failing tests (probably a path typo) which is
   // what we want.
   def readResource(resourcePath: String): String =

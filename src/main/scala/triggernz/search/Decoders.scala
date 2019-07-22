@@ -15,7 +15,7 @@ import cats.syntax.option._
 
 object Decoders {
   implicit val decodeOrganizationId: Decoder[OrganizationId] =
-    Decoder.decodeLong.map(OrganizationId)
+    Decoder.decodeLong.map(OrganizationId.apply)
 
   implicit val decodeUrl: Decoder[URL] =
     Decoder.decodeString.emapTry { s =>
@@ -28,10 +28,10 @@ object Decoders {
     }
 
   implicit val decodeExternalId: Decoder[ExternalId] =
-    decodeUuid.map(ExternalId)
+    decodeUuid.map(ExternalId.apply)
 
   implicit val decodeDomainName: Decoder[DomainName] =
-    Decoder.decodeString.map(DomainName)
+    Decoder.decodeString.map(DomainName.apply)
 
   implicit val decodeSharedTickets: Decoder[SharedTickets] =
     Decoder.decodeBoolean.map {
@@ -40,7 +40,7 @@ object Decoders {
     }
 
   implicit val decodeTag: Decoder[Tag] =
-    Decoder.decodeString.map(Tag)
+    Decoder.decodeString.map(Tag.apply)
 
   implicit val decodeZonedDateTime: Decoder[ZonedDateTime] =
     Decoder.decodeZonedDateTimeWithFormatter {
@@ -64,7 +64,7 @@ object Decoders {
       "tags")(Organization.apply)
 
   implicit val decodeUserId: Decoder[UserId] =
-    Decoder.decodeLong.map(UserId)
+    Decoder.decodeLong.map(UserId.apply)
 
   implicit val decodeActiveStatus: Decoder[ActiveStatus] =
     Decoder.decodeBoolean.map {
@@ -96,7 +96,7 @@ object Decoders {
     }
 
   implicit val decodePhoneNumber: Decoder[PhoneNumber] =
-    Decoder.decodeString.map(PhoneNumber)
+    Decoder.decodeString.map(PhoneNumber.apply)
 
   implicit val decodeSuspendStatus: Decoder[SuspendStatus] =
     Decoder.decodeBoolean.map {
@@ -113,10 +113,10 @@ object Decoders {
     }
 
   implicit val decodeTimezone: Decoder[Timezone] =
-    Decoder.decodeString.map(Timezone)
+    Decoder.decodeString.map(Timezone.apply)
 
   implicit val decodeTicketId: Decoder[TicketId] =
-    decodeUuid.map(TicketId)
+    decodeUuid.map(TicketId.apply)
 
   implicit val decodeTicketType: Decoder[TicketType] =
     Decoder.decodeString.emap {

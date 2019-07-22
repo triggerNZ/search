@@ -1,15 +1,15 @@
 package triggernz.search
 
-import cats.{FlatMap, Id}
+import cats.{Id, Monad}
 import cats.syntax.flatMap._
+import cats.syntax.functor._
 import japgolly.univeq.UnivEq
-import monocle.Lens
 
 import scala.collection.immutable.HashMap
 import scala.collection.mutable.{HashMap => MutHashMap}
 
 
-trait Store[F[_], Query, T] {
+abstract class Store[F[_], Query, T : UnivEq] {
   type DataLoc
 
   def lookupOne(q: Query): F[Vector[DataLoc]]
@@ -18,14 +18,21 @@ trait Store[F[_], Query, T] {
   def retrieveOne(loc: DataLoc): F[Option[T]]
   def retrieveMany(locs: Vector[DataLoc]): F[Vector[T]]
 
-  def lookupAndRetrieve(q: Query)(implicit M: FlatMap[F]) =
+  def lookupAndRetrieve(q: Query)(implicit M: Monad[F]) =
     for {
       lookupResult <- lookupOne(q)
       retrieveResult <- retrieveMany(lookupResult)
-    } yield retrieveResult
+    } yield retrieveResult.distinct  // Distinct here is safe as the number of results is expected to be small
+
+  def lookupAndRetrieveMany(qs: Vector[Query])(implicit M: Monad[F]) =
+    for {
+      lookupResults <- lookupMany(qs)
+      retrieveResult <- retrieveMany(lookupResults)
+    } yield retrieveResult.distinct // Distinct here is safe as the number of results is expected to be small
 }
 
-class VectorStore[T, Q: UnivEq] private (vec: Vector[T], index: HashMap[Q, Vector[Int]]) extends Store[Id, Q, T] {
+
+class VectorStore[T: UnivEq, Q: UnivEq] private (vec: Vector[T], index: HashMap[Q, Vector[Int]]) extends Store[Id, Q, T] {
   type DataLoc = Int
 
   def lookupOne(q: Q) = index.getOrElse(q, Vector.empty)
@@ -39,28 +46,33 @@ class VectorStore[T, Q: UnivEq] private (vec: Vector[T], index: HashMap[Q, Vecto
 
   def retrieveMany(locs: Vector[DataLoc]) =
     locs.flatMap(retrieveOne)
+
 }
 
-object Store {
-  def fromVector[T, Q](v: Vector[T], queries: Vector[Lens[T, Q]]) = new VectorStore[T, Q](
+object VectorStore {
+  // Convenience method from tests
+  def apply[T: UnivEq, Q: UnivEq](v: Vector[T], queries: (T => Vector[Q])*): VectorStore[T, Q] =
+    build(v, queries.toVector)
+
+  def build[T: UnivEq, Q: UnivEq](v: Vector[T], queries: Vector[T => Vector[Q]]) = new VectorStore[T, Q](
     v,
     buildIndex(v, queries)
   )
 
-  private def buildIndex[T, Q](v: Vector[T], queries: Vector[Lens[T, Q]]): HashMap[Q, Vector[Int]] = {
+  private def buildIndex[T, Q](v: Vector[T], queries: Vector[T => Vector[Q]]): HashMap[Q, Vector[Int]] = {
     // Two traversals. One to build the map, one to make it immutable. We could do it with one
     // by passing the mutable map around but that breaks referential transparency.
     var mutableMap = MutHashMap.empty[Q, Vector[Int]]
 
     v.iterator.zipWithIndex.foreach { case (t, idx) =>
-      val newQs: Vector[Q] = queries.map(_.get(t))
+      val newQs: Vector[Q] = queries.flatMap(_(t))
       newQs.foreach { q =>
         val oldIndices = mutableMap.getOrElse(q, Vector.empty)
-        mutableMap.put(q, oldIndices :+ idx)
+        val updatedIndices = if (oldIndices.contains(idx)) oldIndices else oldIndices :+ idx
+        mutableMap.put(q, updatedIndices)
       }
     }
 
     (HashMap.newBuilder[Q, Vector[Int]] ++= mutableMap).result()
   }
-
 }
