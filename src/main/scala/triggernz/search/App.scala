@@ -26,31 +26,39 @@ object Data {
 //TODO: Flesh out
 object Queries {
   object Organizations {
-    def id(o: Organization) = Vector(o.id.value.toString)
-    def name(o: Organization) = Vector(o.name)
-    def tags(o: Organization) = o.tags.map(_.value)
-    def domainNames(o: Organization): Vector[String] = o.domainNames.map(_.value)
-    val all: Vector[Organization => Vector[String]] = Vector(
+    val id =  IndexGen((o: Organization) => Vector(o.id.value.toString))
+    val name = IndexGen((o: Organization) => Vector(o.name))
+    val tags = IndexGen((o: Organization) => o.tags.map(_.value))
+    val domainNames = IndexGen((o: Organization) => o.domainNames.map(_.value))
+
+    val all: Vector[IndexGen[Id, Organization, String]] = Vector(
       id, name, tags, domainNames
     )
   }
 
   object Users {
-    def id(u: User) = Vector(u.id.value.toString)
-    def name(u: User) = Vector(u.name)
-    def alias(u: User) = u.alias.toVector
-    def tags(u: User) = u.tags.map(_.value)
+    val id = IndexGen((u: User) => Vector(u.id.value.toString))
+    val name = IndexGen((u: User) => Vector(u.name))
+    val alias = IndexGen((u: User) => u.alias.toVector)
+    val tags = IndexGen((u: User) => u.tags.map(_.value))
 
-    val all: Vector[User => Vector[String]] =
+    def orgName(orgStore: Store[Id, String, Organization]) =
+      IndexGen.Join[Id, User, Organization, String](
+      (u: User) => u.organizationId.map(_.value.toString).toVector,
+      (o: Organization) => Vector(o.name),
+      orgStore
+    )
+
+    val all: Vector[IndexGen[Id, User, String]] =
       Vector(id, name, alias, tags)
   }
 
   object Tickets {
-    def id(t: Ticket) = Vector(t.id.value.toString)
-    def subject(t: Ticket) = Vector(t.subject)
-    def tags(t: Ticket) = t.tags.map(_.value)
+    val id = IndexGen((t: Ticket) => Vector(t.id.value.toString))
+    val subject = IndexGen((t: Ticket) => Vector(t.subject))
+    val tags = IndexGen((t: Ticket) => t.tags.map(_.value))
 
-    val all : Vector[Ticket => Vector[String]] =
+    val all : Vector[IndexGen[Id, Ticket, String]] =
       Vector(id, subject, tags)
   }
 

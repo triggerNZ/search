@@ -33,6 +33,12 @@ object QueriesTest extends TestSuite {
         store.lookupAndRetrieveMany(Vector("Miss Coffey")) ==> Vector(users(0))
         store.lookupAndRetrieveMany(Vector("Francisca Rasmussen", "Miss Coffey")) ==> Vector(users(0))
       }
+
+      'organizationName {
+        val orgStore = VectorStore(organizations, Queries.Organizations.id)
+        val store = VectorStore(users, Queries.Users.orgName(orgStore))
+        store.lookupAndRetrieveMany(Vector("Terrasys")).length ==> 5
+      }
     }
 
     'tickets - {

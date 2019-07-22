@@ -31,6 +31,8 @@ abstract class Store[F[_], Query, T : UnivEq] {
     } yield retrieveResult.distinct // Distinct here is safe as the number of results is expected to be small
 }
 
+object Store {
+}
 
 class VectorStore[T: UnivEq, Q: UnivEq] private (vec: Vector[T], index: HashMap[Q, Vector[Int]]) extends Store[Id, Q, T] {
   type DataLoc = Int
@@ -46,20 +48,19 @@ class VectorStore[T: UnivEq, Q: UnivEq] private (vec: Vector[T], index: HashMap[
 
   def retrieveMany(locs: Vector[DataLoc]) =
     locs.flatMap(retrieveOne)
-
 }
 
 object VectorStore {
   // Convenience method from tests
-  def apply[T: UnivEq, Q: UnivEq](v: Vector[T], queries: (T => Vector[Q])*): VectorStore[T, Q] =
+  def apply[T: UnivEq, Q: UnivEq](v: Vector[T], queries: IndexGen[Id, T, Q]*): VectorStore[T, Q] =
     build(v, queries.toVector)
 
-  def build[T: UnivEq, Q: UnivEq](v: Vector[T], queries: Vector[T => Vector[Q]]) = new VectorStore[T, Q](
+  def build[T: UnivEq, Q: UnivEq](v: Vector[T], queries: Vector[IndexGen[Id, T, Q]]) = new VectorStore[T, Q](
     v,
     buildIndex(v, queries)
   )
 
-  private def buildIndex[T, Q](v: Vector[T], queries: Vector[T => Vector[Q]]): HashMap[Q, Vector[Int]] = {
+  private def buildIndex[T, Q](v: Vector[T], queries: Vector[IndexGen[Id, T, Q]]): HashMap[Q, Vector[Int]] = {
     // Two traversals. One to build the map, one to make it immutable. We could do it with one
     // by passing the mutable map around but that breaks referential transparency.
     var mutableMap = MutHashMap.empty[Q, Vector[Int]]
@@ -74,5 +75,27 @@ object VectorStore {
     }
 
     (HashMap.newBuilder[Q, Vector[Int]] ++= mutableMap).result()
+  }
+}
+
+sealed trait IndexGen[F[_], T, Q] {
+  def apply(t: T): F[Vector[Q]]
+}
+object IndexGen {
+  def apply[T, Q](getter: T => Vector[Q]): IndexGen[Id, T, Q] =
+    Direct[Id, T, Q](getter)
+
+  case class Direct[F[_]: Monad, T, Q](getter: T => Vector[Q]) extends IndexGen[F, T, Q] {
+    def apply(t: T) = Monad[F].pure(getter(t))
+  }
+  case class Join[F[_]: Monad, T, S, Q](parentGetter: T => Vector[Q], childGetter: S => Vector[Q], childStore: Store[F, Q, S])
+    extends IndexGen[F, T, Q]{
+    def apply(t: T) = {
+      val parentQs = parentGetter(t)
+      val childrenF = childStore.lookupAndRetrieveMany(parentQs)
+      childrenF.map { children =>
+         children.flatMap(childGetter)
+      }
+    }
   }
 }
