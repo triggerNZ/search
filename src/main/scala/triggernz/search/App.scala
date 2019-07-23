@@ -1,12 +1,12 @@
 package triggernz.search
 
 import cats.Id
-
 import Decoders._
+
 
 object App {
   def main(args: Array[String]) = {
-    println(Tables.organizations.table(Data.organizations))
+    Repl(Stores.orgStores, Stores.userStores, Stores.ticketStores, Tables.organizations, Tables.users, Tables.tickets).start()
   }
 }
 
@@ -21,6 +21,21 @@ object Tables {
       Column[Organization]("Tags", 40, _.tags.map(_.value).mkString(", ")),
       Column[Organization]("Details", 11, _.details),
     )
+
+  val users: TextTable[User] = TextTable(
+    Column[User]("Id", 4, _.id.value.toString),
+    Column[User]("Name", 15 , _.name),
+    Column[User]("Alias", 15, _.alias.getOrElse("")),
+    Column[User]("Tags", 40, _.tags.map(_.value).mkString(", ")),
+  )
+
+  val tickets: TextTable[Ticket] = TextTable(
+    Column[Ticket]("Id", 38, _.id.value.toString),
+    Column[Ticket]("Subject", 40, _.subject),
+    Column[Ticket]("Tags", 45, _.tags.map(_.value).mkString(", ")),
+    Column[Ticket]("Priority", 8, _.priority.toString),
+    Column[Ticket]("Type", 8, _.ticketType.toString)
+  )
 }
 
 object Data {
@@ -45,9 +60,10 @@ object Queries {
     val name = IndexGen((o: Organization) => Vector(o.name))
     val tags = IndexGen((o: Organization) => o.tags.map(_.value))
     val domainNames = IndexGen((o: Organization) => o.domainNames.map(_.value))
+    val url = IndexGen((o: Organization) => Vector(o.url.toString))
 
     val all: Vector[IndexGen[Id, Organization, String]] = Vector(
-      id, name, tags, domainNames
+      id, name, tags, domainNames, url
     )
   }
 
@@ -71,10 +87,48 @@ object Queries {
   object Tickets {
     val id = IndexGen((t: Ticket) => Vector(t.id.value.toString))
     val subject = IndexGen((t: Ticket) => Vector(t.subject))
-    val tags = IndexGen((t: Ticket) => t.tags.map(_.value))
+    val subjectWords = IndexGen((t: Ticket) => t.subject.split("[., ]+").toVector.map(_.toLowerCase))
+    val tags = IndexGen((t: Ticket) => t.tags.map(_.value.toLowerCase))
+    val priority = IndexGen((t: Ticket) => Vector(t.priority.toString.toLowerCase))
+    val ticketType = IndexGen((t: Ticket) => t.ticketType.map(_.toString.toLowerCase).toVector)
 
     val all : Vector[IndexGen[Id, Ticket, String]] =
-      Vector(id, subject, tags)
+      Vector(id, subject, subjectWords, tags, priority, ticketType)
   }
 
+}
+
+object Stores {
+  import Data._
+
+  lazy val orgIdStore = VectorStore(organizations, Queries.Organizations.id)
+
+  val orgStores: Map[String, Store[Id, String, Organization]] =
+    Map(
+      "id" -> orgIdStore,
+      "name" -> VectorStore(organizations, Queries.Organizations.name),
+      "tags" -> VectorStore(organizations, Queries.Organizations.tags),
+      "domainNames" -> VectorStore(organizations, Queries.Organizations.domainNames),
+      "all" -> VectorStore.build(organizations, Queries.Organizations.all)
+    )
+
+  val userStores: Map[String, Store[Id, String, User]] =
+    Map(
+      "id" -> VectorStore(users, Queries.Users.id),
+      "name" -> VectorStore(users, Queries.Users.name, Queries.Users.alias),
+      "tags" -> VectorStore(users, Queries.Users.tags),
+      "orgName" -> VectorStore(users, Queries.Users.orgName(orgIdStore)),
+      "all" -> VectorStore.build(users, Queries.Users.all)
+    )
+
+  val ticketStores: Map[String, Store[Id, String, Ticket]] =
+    Map(
+      "id" -> VectorStore(tickets, Queries.Tickets.id),
+      "subject" -> VectorStore(tickets, Queries.Tickets.subject),
+      "subjectWords" -> VectorStore(tickets, Queries.Tickets.subjectWords),
+      "tags" -> VectorStore(tickets, Queries.Tickets.tags),
+      "priority" -> VectorStore(tickets, Queries.Tickets.priority),
+      "type" -> VectorStore(tickets, Queries.Tickets.ticketType),
+      "all" -> VectorStore.build(tickets, Queries.Tickets.all)
+    )
 }

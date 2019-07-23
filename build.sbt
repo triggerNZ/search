@@ -7,6 +7,8 @@ val monocleVersion = "1.6.0"
 val univEqVersion = "1.0.5"
 val catsVersion = "1.5.0"
 val catsEffectVersion =  "1.3.1"
+val jlineVersion = "3.12.1"
+
 
 libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % circeVersion,
@@ -17,6 +19,7 @@ libraryDependencies ++= Seq(
   "com.github.japgolly.univeq" %% "univeq-cats" % univEqVersion,
   "org.typelevel" %% "cats-core" % catsVersion,
   "org.typelevel" %% "cats-effect" % catsEffectVersion,
+  "org.jline" % "jline" % jlineVersion,
   "com.github.julien-truffaut" %%  "monocle-law"   % monocleVersion % Test,
   "com.lihaoyi" %% "utest" % "0.7.1" % Test,
 )
