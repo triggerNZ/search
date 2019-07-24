@@ -3,7 +3,6 @@ package triggernz.search
 import java.util.Locale
 
 object LocaleUtil {
-  // Single traversal
   lazy val allLocales: Set[String] =
     (Set.newBuilder[String]
       ++= Locale.getAvailableLocales().toIterator

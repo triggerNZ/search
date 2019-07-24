@@ -83,7 +83,6 @@ object Role {
   implicit def univEq: UnivEq[Role] = UnivEq.derive
 }
 
-// TODO: use one of the java timezone classes
 case class Timezone(name: String) extends AnyVal
 object Timezone {
   implicit def univEq: UnivEq[Timezone] = UnivEq.derive

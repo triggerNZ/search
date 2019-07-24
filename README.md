@@ -137,3 +137,15 @@ in a table, I wanted to fit the table to the width of a typical fullscreen termi
 reasonable, at least on my Macbook Pro). It is easy to add more columns in `Tables.scala`.
 
 A more reasonable approach might be to extend the query language to allow the user to select fields, rather than hardcoding an arbitrary set.
+
+### Manual decoders
+
+The JSON decoders for each type were defined manually in `Decoders.scala`. That has the disadvantage of boilerplate but the advantage
+of more fine-grained control over field names (e.g. `domain_names` doesn't conform to usual scala naming 
+conventions) and also over schema evolution over time.
+
+### In-memory data
+
+This approach could just as well extend to building indices from large random access files without taking all the data 
+into memory. As long as the indices fit into memory, we could access much larger volumes of data. However, this wasn't 
+implemented due to limited time in implementing this project.
