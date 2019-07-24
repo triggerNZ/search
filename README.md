@@ -62,6 +62,12 @@ Queries are in the form `<dataset>.<index>:<query>`, where
 - `query` is the text to search for.
 
 
+Help and tab completion
+-----------------------
+
+To get a view of all of the available indices, use the `help` command. There is also
+tab completion. So you can start typing the name of a dataset or index and they will be completed for you.
+
 Design
 ======
 

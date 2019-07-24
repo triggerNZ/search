@@ -54,37 +54,64 @@ case class Repl(
       .completer(ReplCompleter)
         .appName("search")
         .build()
+
+    println("Welcome. Use tab completion to explore datasets or type help.")
+
     while(true) {
       try {
         val line = reader.readLine("> ")
-        val parsedLine = PartialQuery.parse(line)
-        parsedLine match {
-          case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Users, index, query)) =>
-            userStores.get(index) match {
-              case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Users}")
-              case Some(store) => handleQuery(store, query, userTable)
-            }
-          case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Organizations, index, query)) =>
-            orgStores.get(index) match {
-              case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Organizations}")
-              case Some(store) => handleQuery(store, query, orgTable)
-            }
+        if (line == "help") {
+          printHelp()
+        } else {
+          val parsedLine = PartialQuery.parse(line)
+          parsedLine match {
+            case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Users, index, query)) =>
+              userStores.get(index) match {
+                case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Users}")
+                case Some(store) => handleQuery(store, query, userTable)
+              }
+            case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Organizations, index, query)) =>
+              orgStores.get(index) match {
+                case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Organizations}")
+                case Some(store) => handleQuery(store, query, orgTable)
+              }
 
-          case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Tickets, index, query)) =>
-            ticketStores.get(index) match {
-              case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Tickets}")
-              case Some(store) => handleQuery(store, query, ticketTable)
-            }
+            case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Tickets, index, query)) =>
+              ticketStores.get(index) match {
+                case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Tickets}")
+                case Some(store) => handleQuery(store, query, ticketTable)
+              }
 
-          case _ =>
-            println("Invalid query")
+            case _ =>
+              println("Invalid query")
 
+          }
         }
       } catch {
         case _: EndOfFileException => return
         case _: UserInterruptException => return
       }
     }
+  }
+
+  def printHelp(): Unit = {
+    val message =
+      s"""
+        |Query format: <dataset>.<index>:<query>
+        |
+        |Where dataset is one of organizations, users, tickets, and the following are the indexes per each dataset.
+        |
+        |organizations:
+        |${orgStores.keys.map(" - " + _).mkString("\n")}
+        |
+        |users:
+        |${userStores.keys.map(" - " + _).mkString("\n")}
+
+        |tickets:
+        |${ticketStores.keys.map(" - " + _).mkString("\n")}
+        |""".stripMargin
+
+    println(message)
   }
 
   def handleQuery[A](store: Store[Id, String, A], query: String, table: TextTable[A]): Unit = {
