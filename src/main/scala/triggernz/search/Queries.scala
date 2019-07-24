@@ -1,19 +1,31 @@
 package triggernz.search
 
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
 import cats.Id
 
 object Queries {
+  private def date(d: ZonedDateTime) =
+    Vector(d.format(DateTimeFormatter.ISO_DATE_TIME), d.format(DateTimeFormatter.RFC_1123_DATE_TIME))
+
   object Organizations {
     val id =  IndexGen((o: Organization) => Vector(o.id))
     val idString =  IndexGen((o: Organization) => Vector(o.id.value.toString))
-
-    val name = IndexGen((o: Organization) => Vector(o.name))
-    val tags = IndexGen((o: Organization) => o.tags.map(_.value))
-    val domainNames = IndexGen((o: Organization) => o.domainNames.map(_.value))
     val url = IndexGen((o: Organization) => Vector(o.url.toString))
+    val externalId = IndexGen((o: Organization) => Vector(o.externalId.value.toString))
+    val name = IndexGen((o: Organization) => Vector(o.name))
+    val domainNames = IndexGen((o: Organization) => o.domainNames.map(_.value))
+    val createdAt = IndexGen((o: Organization) => date(o.createdAt))
+    val details = IndexGen((o: Organization) => Vector(o.details))
+    val sharedTickets = IndexGen((o: Organization) => Vector(o.sharedTickets match {
+      case SharedTickets.Enabled => "Y"
+      case SharedTickets.Disabled => "N"
+    }))
+    val tags = IndexGen((o: Organization) => o.tags.map(_.value))
 
     val all: Vector[IndexGen[Id, Organization, String]] = Vector(
-      idString, name, tags, domainNames, url
+      idString, name, tags, domainNames, url, createdAt, details, sharedTickets, externalId
     )
   }
 

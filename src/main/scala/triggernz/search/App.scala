@@ -18,9 +18,14 @@ object Stores {
   val orgStores: Map[String, Store[Id, String, Organization]] =
     Map(
       "id" -> VectorStore(organizations, Queries.Organizations.idString),
+      "url" -> VectorStore(organizations, Queries.Organizations.url),
+      "externalId" -> VectorStore(organizations, Queries.Organizations.externalId),
       "name" -> VectorStore(organizations, Queries.Organizations.name),
-      "tags" -> VectorStore(organizations, Queries.Organizations.tags),
       "domainNames" -> VectorStore(organizations, Queries.Organizations.domainNames),
+      "createdAt" -> VectorStore(organizations, Queries.Organizations.createdAt),
+      "details" -> VectorStore(organizations, Queries.Organizations.details),
+      "tags" -> VectorStore(organizations, Queries.Organizations.tags),
+      "sharedTickets" -> VectorStore(organizations, Queries.Organizations.sharedTickets),
       "all" -> VectorStore.build(organizations, Queries.Organizations.all)
     )
 
