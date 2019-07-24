@@ -42,6 +42,9 @@ object Stores {
       "tags" -> VectorStore(tickets, Queries.Tickets.tags),
       "priority" -> VectorStore(tickets, Queries.Tickets.priority),
       "type" -> VectorStore(tickets, Queries.Tickets.ticketType),
+      "submitter" -> VectorStore(tickets, Queries.Tickets.submitterName(userIdStore)),
+      "assignee" -> VectorStore(tickets, Queries.Tickets.assigneeName(userIdStore)),
+      "user" -> VectorStore.build(tickets, Queries.Tickets.userName(userIdStore)),
       "all" -> VectorStore.build(tickets, Queries.Tickets.all)
     )
 }

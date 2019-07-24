@@ -24,6 +24,6 @@ object Tables {
     Column[Ticket]("Subject", 40, _.subject),
     Column[Ticket]("Tags", 45, _.tags.map(_.value).mkString(", ")),
     Column[Ticket]("Priority", 8, _.priority.toString),
-    Column[Ticket]("Type", 8, _.ticketType.toString)
+    Column[Ticket]("Type", 8, _.ticketType.map(_.toString).getOrElse(""))
   )
 }

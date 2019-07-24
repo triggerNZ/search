@@ -40,6 +40,22 @@ object Queries {
     val priority = IndexGen((t: Ticket) => Vector(t.priority.toString.toLowerCase))
     val ticketType = IndexGen((t: Ticket) => t.ticketType.map(_.toString.toLowerCase).toVector)
 
+    def assigneeName(userStore: Store[Id, String, User]) =
+      IndexGen.Join(
+        (t: Ticket) => t.assigneeId.map(_.value.toString).toVector,
+        (u: User) => Vector(u.name) ++ u.alias.toVector,
+        userStore
+      )
+    def submitterName(userStore: Store[Id, String, User]) =
+      IndexGen.Join(
+        (t: Ticket) => Vector(t.submitterId.value.toString),
+        (u: User) => Vector(u.name) ++ u.alias.toVector,
+        userStore
+      )
+
+    def userName(userStore: Store[Id, String, User]) =
+      Vector(submitterName(userStore), assigneeName(userStore))
+
     val all : Vector[IndexGen[Id, Ticket, String]] =
       Vector(id, subject, subjectWords, tags, priority, ticketType)
   }
