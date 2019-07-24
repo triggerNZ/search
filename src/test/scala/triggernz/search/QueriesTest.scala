@@ -9,7 +9,7 @@ object QueriesTest extends TestSuite {
     'organizations - {
       'id - {
         val store = VectorStore(organizations, Queries.Organizations.id)
-        store.lookupAndRetrieveMany(Vector("101", "102", "103")) ==> organizations.take(3)
+        store.lookupAndRetrieveMany(Vector(OrganizationId(101), OrganizationId(102), OrganizationId(103))) ==> organizations.take(3)
       }
 
       'name - {

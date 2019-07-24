@@ -88,14 +88,15 @@ object IndexGen {
   case class Direct[F[_]: Monad, T, Q](getter: T => Vector[Q]) extends IndexGen[F, T, Q] {
     def apply(t: T) = Monad[F].pure(getter(t))
   }
-  case class Join[F[_]: Monad, T, S, Q](parentGetter: T => Vector[Q], childGetter: S => Vector[Q], childStore: Store[F, Q, S])
+  case class Join[F[_]: Monad, T, S, Q, PQ](parentGetter: T => Vector[PQ], childGetter: S => Vector[Q], childStore: Store[F, PQ, S])
     extends IndexGen[F, T, Q]{
     def apply(t: T) = {
-      val parentQs = parentGetter(t)
+      val parentQs: Vector[PQ] = parentGetter(t)
       val childrenF = childStore.lookupAndRetrieveMany(parentQs)
       childrenF.map { children =>
          children.flatMap(childGetter)
       }
     }
+
   }
 }

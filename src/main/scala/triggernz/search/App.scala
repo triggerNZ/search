@@ -5,7 +5,7 @@ import cats.Id
 
 object App {
   def main(args: Array[String]) = {
-    Repl(Stores.orgStores, Stores.userStores, Stores.ticketStores, Tables.organizations, Tables.users, Tables.tickets).start()
+    Repl(Stores.orgStores, Stores.userStores, Stores.ticketStores, Stores.userIdStore, Stores.orgIdStore).start()
   }
 }
 
@@ -14,11 +14,10 @@ object Stores {
 
   lazy val orgIdStore = VectorStore(organizations, Queries.Organizations.id)
   lazy val userIdStore =  VectorStore(users, Queries.Users.id)
-  lazy val ticketIdStore = VectorStore(tickets, Queries.Tickets.id)
 
   val orgStores: Map[String, Store[Id, String, Organization]] =
     Map(
-      "id" -> orgIdStore,
+      "id" -> VectorStore(organizations, Queries.Organizations.idString),
       "name" -> VectorStore(organizations, Queries.Organizations.name),
       "tags" -> VectorStore(organizations, Queries.Organizations.tags),
       "domainNames" -> VectorStore(organizations, Queries.Organizations.domainNames),
@@ -27,7 +26,7 @@ object Stores {
 
   val userStores: Map[String, Store[Id, String, User]] =
     Map(
-      "id" -> userIdStore,
+      "id" -> VectorStore(users, Queries.Users.idString),
       "name" -> VectorStore(users, Queries.Users.name, Queries.Users.alias),
       "tags" -> VectorStore(users, Queries.Users.tags),
       "orgName" -> VectorStore(users, Queries.Users.orgName(orgIdStore)),
@@ -36,7 +35,7 @@ object Stores {
 
   val ticketStores: Map[String, Store[Id, String, Ticket]] =
     Map(
-      "id" -> ticketIdStore,
+      "id" -> VectorStore(tickets, Queries.Tickets.id),
       "subject" -> VectorStore(tickets, Queries.Tickets.subject),
       "subjectWords" -> VectorStore(tickets, Queries.Tickets.subjectWords),
       "tags" -> VectorStore(tickets, Queries.Tickets.tags),

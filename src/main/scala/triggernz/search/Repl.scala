@@ -2,16 +2,17 @@ package triggernz.search
 
 import java.util
 
-import cats.Id
+import cats.{Foldable, Id}
+import cats.instances.vector._
+import cats.instances.string._
 import org.jline.reader._
 
 case class Repl(
                  orgStores: Map[String, Store[Id, String, Organization]],
                  userStores: Map[String, Store[Id, String, User]],
                  ticketStores: Map[String, Store[Id, String, Ticket]],
-                 orgTable: TextTable[Organization],
-                 userTable: TextTable[User],
-                 ticketTable: TextTable[Ticket],
+                 userIdStore: Store[Id, UserId, User],
+                 orgIdStore: Store[Id, OrganizationId, Organization],
                ) {
   object HardcodedDatasets {
     val Tickets = "tickets"
@@ -48,6 +49,13 @@ case class Repl(
     }
   }
 
+  def outputResult[R](lineReader: LineReader, results: Vector[R], single: R => List[String]): Unit = {
+    val separator = "\n" + ("-" * lineReader.getTerminal.getWidth)
+
+    val wholeOutput = Foldable[Vector].intercalate(results.map(r => single(r).mkString("\n")), separator)
+    println(wholeOutput)
+  }
+
   def start(): Unit = {
     val reader =
       LineReaderBuilder.builder()
@@ -68,18 +76,38 @@ case class Repl(
             case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Users, index, query)) =>
               userStores.get(index) match {
                 case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Users}")
-                case Some(store) => handleQuery(store, query, userTable)
+                case Some(store) =>
+                  val results = store.lookupAndRetrieve(query)
+                  val usersWithOrgs = results.map { user =>
+                    val organization = user.organizationId.flatMap(id => orgIdStore.lookupAndRetrieve(id).headOption)
+                    (user, organization)
+                  }
+                  outputResult(reader, usersWithOrgs, (TextLayout.layoutUser _).tupled)
+
               }
             case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Organizations, index, query)) =>
               orgStores.get(index) match {
                 case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Organizations}")
-                case Some(store) => handleQuery(store, query, orgTable)
+                case Some(store) =>
+                  val results = store.lookupAndRetrieve(query)
+                  outputResult(reader, results, TextLayout.layoutOrganization)
               }
 
             case Right(PartialQuery.DatasetIndexAndQuery(HardcodedDatasets.Tickets, index, query)) =>
               ticketStores.get(index) match {
                 case None => println(s"No index named ${index} for dataset ${HardcodedDatasets.Tickets}")
-                case Some(store) => handleQuery(store, query, ticketTable)
+                case Some(store) =>
+                  val results = store.lookupAndRetrieve(query)
+                  val ticketWithEverything = results.map { ticket =>
+                    val organization = ticket.organizationId.flatMap(id => orgIdStore.lookupAndRetrieve(id).headOption)
+                    val assignee = ticket.assigneeId.flatMap(u => userIdStore.lookupAndRetrieve(u).headOption)
+                    val assigneeOrg = assignee.flatMap(_.organizationId).flatMap(id => orgIdStore.lookupAndRetrieve(id).headOption)
+                    val submitter = userIdStore.lookupAndRetrieve(ticket.submitterId).head //TODO: unsafe
+                    val submitterOrg = submitter.organizationId.flatMap(id => orgIdStore.lookupAndRetrieve(id).headOption)
+                    (ticket, organization, assignee, assigneeOrg, submitter, submitterOrg)
+                  }
+                  outputResult(reader, ticketWithEverything, (TextLayout.layoutTicket _).tupled)
+
               }
 
             case _ =>
@@ -113,10 +141,9 @@ case class Repl(
 
     println(message)
   }
+}
 
-  def handleQuery[A](store: Store[Id, String, A], query: String, table: TextTable[A]): Unit = {
-    println(table.table(store.lookupAndRetrieve(query)))
-  }
+object Repl {
 }
 
 sealed trait PartialQuery
