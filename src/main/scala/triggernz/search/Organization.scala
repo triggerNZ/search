@@ -5,11 +5,9 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 import japgolly.univeq.UnivEq
-import monocle.macros.Lenses
 
 import JavaUnivEqs._
 
-@Lenses
 case class Organization(id: OrganizationId,
                         url: URL,
                         externalId: ExternalId,

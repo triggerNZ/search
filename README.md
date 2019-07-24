@@ -84,6 +84,9 @@ Then combining 1 and 2 gives us access to the data in two quick operations.
 
 `VectorStore` uses a `Vector` for 1, (logarithmic operation) and a `HashMap` for 2.
 
+The `Store` operations are defined to return an arbitrary `F[_]` monad to allow for more complex access patterns. However,
+`VectorStore` fixes that `F` to `Id`.
+
 Bulding a store
 ---------------
 `VectorStore` takes a `Vector` of values, and one of `QueryGen`s (which is a way of generating index keys),
@@ -96,6 +99,15 @@ from value to an index key, thus allowing us to map values to keys from related 
 Once we have stores, then it is a little bit of manual work defining appropriate
 stores for the data model provided. 
 
+
+Libraries
+---------
+
+- Circe  - for JSON processing
+- Cats   - for Monad, since store is defined in terms of arbitrary monads.
+- Jline  - for the REPL and tab completion
+- Univeq - for proofs of natural hashCode and equality so that HashSets can be used safely
+- Utest  - for testing
 
 Tradeoffs/Limitations
 =====================
