@@ -2,7 +2,9 @@ package triggernz.search
 
 import japgolly.univeq.UnivEq
 
-case class Email private (username: String, domain: String)
+case class Email private (username: String, domain: String) {
+  override def toString = s"${username}@${domain}"
+}
 object Email {
   def fromString(s: String): Option[Email] = {
     val atIdx = s.indexOf('@')

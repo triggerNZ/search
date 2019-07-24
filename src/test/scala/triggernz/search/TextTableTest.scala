@@ -3,7 +3,7 @@ package triggernz.search
 import triggernz.search.TextTable.Column
 import utest._
 
-object TestTableTest extends TestSuite {
+object TextTableTest extends TestSuite {
   case class Demo(apple: String, banana: Int)
   val table = TextTable[Demo](Vector(
     Column[Demo]("apple", 8, _.apple),
@@ -43,6 +43,17 @@ object TestTableTest extends TestSuite {
         )) ==> expectedTable
 
     }
-  }
 
+    'width - {
+      table.width ==> 17
+    }
+
+    'widthOfActualTablesIsReadable {
+      import Tables._
+      List(organizations , users, tickets).foreach { table =>
+        // < 180 means we can fit more. > 200 is too wide
+        assert(table.width > 180 && table.width < 200)
+      }
+    }
+  }
 }

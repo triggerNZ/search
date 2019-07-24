@@ -20,6 +20,8 @@ case class TextTable[T](columns: Vector[Column[T]]) {
     "|" + columns.map(col => fit(col.value(t), col.width)).mkString("|") + "|"
 
   def table(ts: Vector[T]) = (header +: ts.map(row) :+ border).mkString("\n")
+
+  lazy val width = columns.map(_.width + 1).sum + 1
 }
 
 object TextTable {

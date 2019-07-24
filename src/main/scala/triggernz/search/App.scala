@@ -45,6 +45,7 @@ object Stores {
       "submitter" -> VectorStore(tickets, Queries.Tickets.submitterName(userIdStore)),
       "assignee" -> VectorStore(tickets, Queries.Tickets.assigneeName(userIdStore)),
       "user" -> VectorStore.build(tickets, Queries.Tickets.userName(userIdStore)),
+      "orgName" -> VectorStore(tickets, Queries.Tickets.orgName(orgIdStore)),
       "all" -> VectorStore.build(tickets, Queries.Tickets.all)
     )
 }

@@ -53,6 +53,13 @@ object Queries {
         userStore
       )
 
+    def orgName(orgStore: Store[Id, String, Organization]) =
+      IndexGen.Join(
+        (t: Ticket) => t.organizationId.map(_.value.toString).toVector,
+        (o: Organization) => Vector(o.name),
+        orgStore
+      )
+
     def userName(userStore: Store[Id, String, User]) =
       Vector(submitterName(userStore), assigneeName(userStore))
 
