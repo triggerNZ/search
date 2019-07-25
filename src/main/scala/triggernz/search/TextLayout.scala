@@ -57,7 +57,7 @@ object TextLayout {
       s"Subject: ${t.subject}",
       s"Description: ${t.description.getOrElse("")}",
       s"Submitter:"
-    ) ++ submitter.toList.flatMap(a => indent(layoutUser(a, assigneeOrg))) ++ List(
+    ) ++ submitter.toList.flatMap(a => indent(layoutUser(a, submitterOrg))) ++ List(
       "Assignee:"
     ) ++ assignee.toList.flatMap(a => indent(layoutUser(a, assigneeOrg))) ++ List(
       "Organization:"

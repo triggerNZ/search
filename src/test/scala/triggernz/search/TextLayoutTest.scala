@@ -87,7 +87,7 @@ object TextLayoutTest extends TestSuite {
           Some(Data.organizations(15)),
           Some(Data.users(23)),
           Some(Data.organizations(9)),
-          Data.users(37),
+          Some(Data.users(37)),
           Some(Data.organizations(13))
         )
 
@@ -185,7 +185,7 @@ object TextLayoutTest extends TestSuite {
           None,
           None,
           None,
-          Data.users(37),
+          None,
           None)
 
          val expected =
@@ -199,25 +199,6 @@ object TextLayoutTest extends TestSuite {
               |Subject: A Catastrophe in Korea (North)
               |Description: Nostrud ad sit velit cupidatat laboris ipsum nisi amet laboris ex exercitation amet et proident. Ipsum fugiat aute dolore tempor nostrud velit ipsum.
               |Submitter:
-              |    Id: 38
-              |    URL: http://initech.zendesk.com/api/v2/users/38.json
-              |    External Id: 72c7ba23-e070-4583-b701-04a038a28b02
-              |    Name: Elma Castro
-              |    Alias: Mr Georgette
-              |    Created At: Sun, 31 Jan 2016 02:46:05 -1100
-              |    Last Login At: Thu, 20 Dec 2012 01:48:00 -1100
-              |    Organization:
-              |    Timezone: Gibraltar
-              |    Role: Agent
-              |    Active: N
-              |    Suspended: Y
-              |    Shared: Y
-              |    Phone: 8364-062-708
-              |    Email: georgettecastro@flotonic.com
-              |    Signature: Don't Worry Be Happy!
-              |    Locale: en-au
-              |    Timezone: Gibraltar
-              |    Tags: Colton, Williamson, Marshall, Charco
               |Assignee:
               |Organization:
               |Tags: Ohio, Pennsylvania, American Samoa, Northern Mariana Islands

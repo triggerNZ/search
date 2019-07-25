@@ -35,6 +35,12 @@ search by his alias Mr Alexandria instead:
 > tickets.submitter:Mr Alexandria
 ```
 
+We can search by all of the provided fields, or for individual members of arrays. E.g
+
+```
+> tickets.tags:Alabama
+```
+
 Query Syntax
 ------------
 
@@ -50,6 +56,13 @@ Help and tab completion
 
 To get a view of all of the available indices, use the `help` command. There is also
 tab completion. So you can start typing the name of a dataset or index and they will be completed for you.
+
+Supported indices
+-----------------
+
+All of the direct fields are available to search. There are additional ones too, for searching across data sources 
+(e.g. `tickets.orgName` for tickets by organization name) or by multiple fields in a source (e.g. `users.nameOrAlias`
+for users by name or alias matching). To get the full list, use the `help` command
 
 Design
 ======

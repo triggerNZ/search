@@ -6,6 +6,7 @@ import cats.{Foldable, Id}
 import cats.instances.vector._
 import cats.instances.string._
 import org.jline.reader._
+import triggernz.search.PartialQuery.ParseError
 
 case class Repl(
                  orgStores: Map[String, Store[String, Organization]],
@@ -109,9 +110,17 @@ case class Repl(
                   outputResult(reader, ticketWithEverything, (TextLayout.layoutTicket _).tupled)
 
               }
+            case Right(PartialQuery.DatasetIndexAndQuery(otherDataset, _, _)) =>
+              println(s"${otherDataset} is not a supported dataset.")
 
-            case _ =>
-              println("Invalid query")
+            case Right(PartialQuery.DatasetAndIndex(ds, idx)) =>
+              println(s"Query is missing. Try something like '${ds}.${idx}:my query'")
+
+            case Right(PartialQuery.JustDataset(ds)) =>
+              println("Incomplete input. Try something like '<dataset>.<index>:<query>' or 'help' for more info")
+
+            case Left(ParseError.NotAQuery(q)) =>
+              println(s"Invalid query '${q}'")
 
           }
         }
