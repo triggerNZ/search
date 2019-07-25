@@ -43,7 +43,6 @@ object SearchByEveryFieldTest extends TestSuite {
           case (_, store) =>
             store.lookupAndRetrieveMany(Vector(leaf, leaf.toLowerCase)).contains(actualValue)
         }
-        println(s"${leaf}")
         assert(foundStores)
       }
     }

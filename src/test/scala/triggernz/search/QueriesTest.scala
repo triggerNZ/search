@@ -51,7 +51,7 @@ object QueriesTest extends TestSuite {
 
       'submitterId - {
         val userStore = VectorStore(users, Queries.Users.id)
-        val store = VectorStore(tickets, Queries.Tickets.submitterId(userStore))
+        val store = VectorStore(tickets, Queries.Tickets.submitterId)
         store.lookupOne("555")
       }
     }

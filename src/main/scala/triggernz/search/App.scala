@@ -46,7 +46,7 @@ object Stores {
       "timezone" -> VectorStore(users, Queries.Users.timezone),
       "tags" -> VectorStore(users, Queries.Users.tags),
       "orgName" -> VectorStore(users, Queries.Users.orgName(orgIdStore)),
-      "orgId" -> VectorStore(users, Queries.Users.orgId(orgIdStore)),
+      "orgId" -> VectorStore(users, Queries.Users.orgId),
       "role" -> VectorStore(users, Queries.Users.role),
       "suspended" -> VectorStore(users, Queries.Users.suspended)
 
@@ -68,12 +68,12 @@ object Stores {
       "status" -> VectorStore(tickets, Queries.Tickets.status),
       "type" -> VectorStore(tickets, Queries.Tickets.ticketType),
       "submitterName" -> VectorStore(tickets, Queries.Tickets.submitterName(userIdStore)),
-      "submitterId" -> VectorStore(tickets, Queries.Tickets.submitterId(userIdStore)),
+      "submitterId" -> VectorStore(tickets, Queries.Tickets.submitterId),
       "assigneeName" -> VectorStore(tickets, Queries.Tickets.assigneeName(userIdStore)),
-      "assigneeId" -> VectorStore(tickets, Queries.Tickets.assigneeId(userIdStore)),
+      "assigneeId" -> VectorStore(tickets, Queries.Tickets.assigneeId),
       "user" -> VectorStore.build(tickets, Queries.Tickets.userName(userIdStore)),
       "orgName" -> VectorStore(tickets, Queries.Tickets.orgName(orgIdStore)),
-      "orgId" -> VectorStore(tickets, Queries.Tickets.orgId(orgIdStore)),
+      "orgId" -> VectorStore(tickets, Queries.Tickets.orgId),
       "hasIncidents" -> VectorStore(tickets, Queries.Tickets.hasIncidents),
       "via" -> VectorStore(tickets, Queries.Tickets.via),
     )

@@ -53,12 +53,7 @@ object Queries {
         orgStore
       )
 
-    def orgId(orgStore: Store[OrganizationId, Organization]) =
-      IndexGen.Join(
-        (u: User) => u.organizationId.toVector,
-        (o: Organization) => Vector(o.id.value.toString),
-        orgStore
-      )
+    val orgId = IndexGen((u: User) => u.organizationId.map(_.value.toString).getOrElse(""))
   }
 
   object Tickets {
@@ -85,12 +80,8 @@ object Queries {
       Vector(str, str.toLowerCase)
     }
 
-    def assigneeId(userStore: Store[UserId, User]) =
-      IndexGen.Join(
-        (t: Ticket) => t.assigneeId.toVector,
-        (u: User) => Vector(u.id.value.toString),
-        userStore
-      )
+    val assigneeId = IndexGen((t: Ticket) => t.assigneeId.map(_.value.toString).getOrElse(""))
+
     def assigneeName(userStore: Store[UserId, User]) =
       IndexGen.Join(
         (t: Ticket) => t.assigneeId.toVector,
@@ -98,12 +89,7 @@ object Queries {
         userStore
       )
 
-    def submitterId(userStore: Store[UserId, User]) =
-      IndexGen.Join(
-        (t: Ticket) => Vector(t.submitterId),
-        (u: User) => Vector(u.id.value.toString),
-        userStore
-      )
+    val submitterId = IndexGen((t: Ticket) => t.submitterId.value.toString)
 
     def submitterName(userStore: Store[UserId, User]) =
       IndexGen.Join(
@@ -112,12 +98,7 @@ object Queries {
         userStore
       )
 
-    def orgId(orgStore: Store[OrganizationId, Organization]) =
-      IndexGen.Join(
-        (t: Ticket) => t.organizationId.toVector,
-        (o: Organization) => Vector(o.id.value.toString),
-        orgStore
-      )
+    val orgId = IndexGen((t: Ticket) => t.organizationId.map(_.value.toString).getOrElse(""))
 
     def orgName(orgStore: Store[OrganizationId, Organization]) =
       IndexGen.Join(
