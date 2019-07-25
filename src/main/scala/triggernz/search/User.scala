@@ -58,6 +58,11 @@ object ShareStatus {
   case object Shared  extends ShareStatus
   case object Private extends ShareStatus
 
+  def searchString(ss: ShareStatus) = ss match {
+    case ShareStatus.Shared => "Y"
+    case ShareStatus.Private => "N"
+  }
+
   implicit def univEq: UnivEq[ShareStatus] = UnivEq.derive
 }
 

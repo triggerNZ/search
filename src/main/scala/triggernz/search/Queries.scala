@@ -41,10 +41,7 @@ object Queries {
       case VerificationStatus.Unverified => "N"
     }.getOrElse(""))
 
-    val shared = IndexGen((u: User) => u.shared match {
-      case ShareStatus.Shared => "Y"
-      case ShareStatus.Private => "N"
-    })
+    val shared = IndexGen((u: User) => ShareStatus.searchString(u.shared))
     val locale = IndexGen((u: User) => u.locale.map(_.toString).getOrElse(""))
     val name = IndexGen((u: User) => u.name)
     val email = IndexGen((u: User) => u.email.map(_.toString).getOrElse(""))
