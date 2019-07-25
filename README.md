@@ -24,14 +24,6 @@ first as an example, find all users in the 'Zentry' organzation:
 
 ```
 > users.orgName:Zentry
-+----+---------------+---------------+----------------------------------------+
-|Id  |Name           |Alias          |Tags                                    |
-+----+---------------+---------------+----------------------------------------+
-|30  |Debra William  |Mr Murray      |Chesterfield, Brutus, Echo, Valmy       |
-|68  |Sweet Cain     |Mr Hyde        |Fairlee, Grandview, Fairview, Williston |
-|70  |Nash Rivers    |Mr Alexandria  |Barclay, Odessa, Southmont, Lisco       |
-+----+---------------+---------------+----------------------------------------+
-> 
 ```
 
 So three users were found, and some of their information was displayed.
@@ -41,15 +33,6 @@ search by his alias Mr Alexandria instead:
 
 ```
 > tickets.submitter:Mr Alexandria
-+--------------------------------------+----------------------------------------+---------------------------------------------+--------+--------+
-|Id                                    |Subject                                 |Tags                                         |Priority|Type    |
-+--------------------------------------+----------------------------------------+---------------------------------------------+--------+--------+
-|1bdad283-b751-407d-a6d5-8067016b8010  |A Drama in Cocos (Keeling Islands)      |Virginia, Virgin Islands, Maine, West Virgini|Urgent  |Problem |
-|3ff0599a-fe0f-4f8f-ac31-e2636843bcea  |A Problem in Antigua and Barbuda        |American Samoa, Northern Mariana Islands, Pue|Low     |Question|
-|e0e5ab4a-a776-40ec-8768-64d83a342d82  |A Drama in Albania                      |South Carolina, Indiana, New Mexico, Nebraska|High    |Task    |
-|945ce2d3-3edc-4936-8d51-e59e74cf917a  |A Drama in Guinea                       |American Samoa, Northern Mariana Islands, Pue|Urgent  |Task    |
-|7a0b41db-f910-4814-8d75-1e0915ec5d27  |A Drama in Bolivia                      |Puerto Rico, Idaho, Oklahoma, Louisiana      |Normal  |Question|
-+--------------------------------------+----------------------------------------+---------------------------------------------+--------+--------+
 ```
 
 Query Syntax
@@ -130,19 +113,15 @@ Presently each of the stores defined in the `Stores` object in `App.scala` trave
 the index. This makes for nice readable code, but for large datasets isn't the most efficient. We should 
 build the indices for a dataset all together via one traversal per dataset.
 
-### Not all of the columns are displayed per each dataset
-
-This was a usability issue. I wanted something nicely presentable and readable. Because I am displaying it
-in a table, I wanted to fit the table to the width of a typical fullscreen terminal (200 characters seemed 
-reasonable, at least on my Macbook Pro). It is easy to add more columns in `Tables.scala`.
-
-A more reasonable approach might be to extend the query language to allow the user to select fields, rather than hardcoding an arbitrary set.
-
-### Manual decoders
+### Manual decoders/indices
 
 The JSON decoders for each type were defined manually in `Decoders.scala`. That has the disadvantage of boilerplate but the advantage
 of more fine-grained control over field names (e.g. `domain_names` doesn't conform to usual scala naming 
 conventions) and also over schema evolution over time.
+
+Similarly, each index is automatically written. Again, it has the disadvantage of boilerplate but it also allows custom
+indexes in the cases where they are required. A great example is `users.byNameOrAlias` which searches by either name or
+alias.
 
 ### In-memory data
 
