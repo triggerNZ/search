@@ -26,30 +26,54 @@ object Stores {
       "details" -> VectorStore(organizations, Queries.Organizations.details),
       "tags" -> VectorStore(organizations, Queries.Organizations.tags),
       "sharedTickets" -> VectorStore(organizations, Queries.Organizations.sharedTickets),
-      "all" -> VectorStore.build(organizations, Queries.Organizations.all)
     )
 
   val userStores: Map[String, Store[Id, String, User]] =
     Map(
       "id" -> VectorStore(users, Queries.Users.idString),
-      "name" -> VectorStore(users, Queries.Users.name, Queries.Users.alias),
+      "url" -> VectorStore(users, Queries.Users.url),
+      "externalId" -> VectorStore(users, Queries.Users.externalId),
+      "name" -> VectorStore(users, Queries.Users.name),
+      "alias" -> VectorStore(users, Queries.Users.alias),
+      "nameOrAlias" -> VectorStore(users, Queries.Users.name, Queries.Users.alias),
+      "createdAt" -> VectorStore(users, Queries.Users.createdAt),
+      "lastLoginAt" -> VectorStore(users, Queries.Users.lastLoginAt),
+      "active" -> VectorStore(users, Queries.Users.active),
+      "verified" -> VectorStore(users, Queries.Users.verified),
+      "shared" -> VectorStore(users, Queries.Users.shared),
+      "locale" -> VectorStore(users, Queries.Users.locale),
+      "email" -> VectorStore(users, Queries.Users.email),
+      "phone" -> VectorStore(users, Queries.Users.phone),
+      "signature" -> VectorStore(users, Queries.Users.signature),
+      "timezone" -> VectorStore(users, Queries.Users.timezone),
       "tags" -> VectorStore(users, Queries.Users.tags),
       "orgName" -> VectorStore(users, Queries.Users.orgName(orgIdStore)),
-      "all" -> VectorStore.build(users, Queries.Users.all)
+      "orgId" -> VectorStore(users, Queries.Users.orgId(orgIdStore)),
     )
 
   val ticketStores: Map[String, Store[Id, String, Ticket]] =
     Map(
       "id" -> VectorStore(tickets, Queries.Tickets.id),
+      "url" -> VectorStore(tickets, Queries.Tickets.url),
+      "externalId" -> VectorStore(tickets, Queries.Tickets.externalId),
+      "createdAt" -> VectorStore(tickets, Queries.Tickets.createdAt),
+      "dueAt" -> VectorStore(tickets, Queries.Tickets.dueAt),
       "subject" -> VectorStore(tickets, Queries.Tickets.subject),
       "subjectWords" -> VectorStore(tickets, Queries.Tickets.subjectWords),
+      "description" -> VectorStore(tickets, Queries.Tickets.subject),
+      "descriptionWords" -> VectorStore(tickets, Queries.Tickets.subjectWords),
       "tags" -> VectorStore(tickets, Queries.Tickets.tags),
       "priority" -> VectorStore(tickets, Queries.Tickets.priority),
+      "status" -> VectorStore(tickets, Queries.Tickets.status),
       "type" -> VectorStore(tickets, Queries.Tickets.ticketType),
-      "submitter" -> VectorStore(tickets, Queries.Tickets.submitterName(userIdStore)),
-      "assignee" -> VectorStore(tickets, Queries.Tickets.assigneeName(userIdStore)),
+      "submitterName" -> VectorStore(tickets, Queries.Tickets.submitterName(userIdStore)),
+      "submitterId" -> VectorStore(tickets, Queries.Tickets.submitterId(userIdStore)),
+      "assigneeName" -> VectorStore(tickets, Queries.Tickets.assigneeName(userIdStore)),
+      "assigneeId" -> VectorStore(tickets, Queries.Tickets.assigneeId(userIdStore)),
       "user" -> VectorStore.build(tickets, Queries.Tickets.userName(userIdStore)),
       "orgName" -> VectorStore(tickets, Queries.Tickets.orgName(orgIdStore)),
-      "all" -> VectorStore.build(tickets, Queries.Tickets.all)
+      "orgId" -> VectorStore(tickets, Queries.Tickets.orgId(orgIdStore)),
+      "hasIncidents" -> VectorStore(tickets, Queries.Tickets.hasIncidents),
+      "via" -> VectorStore(tickets, Queries.Tickets.via),
     )
 }

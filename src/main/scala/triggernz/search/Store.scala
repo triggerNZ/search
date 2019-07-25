@@ -82,8 +82,11 @@ sealed trait IndexGen[F[_], T, Q] {
   def apply(t: T): F[Vector[Q]]
 }
 object IndexGen {
-  def apply[T, Q](getter: T => Vector[Q]): IndexGen[Id, T, Q] =
+  def many[T, Q](getter: T => Vector[Q]): IndexGen[Id, T, Q] =
     Direct[Id, T, Q](getter)
+
+  def apply[T, Q](getter: T => Q): IndexGen[Id, T, Q] =
+    Direct[Id, T, Q](t => Vector(getter(t)))
 
   case class Direct[F[_]: Monad, T, Q](getter: T => Vector[Q]) extends IndexGen[F, T, Q] {
     def apply(t: T) = Monad[F].pure(getter(t))

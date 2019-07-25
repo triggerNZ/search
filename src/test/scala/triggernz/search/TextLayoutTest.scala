@@ -42,6 +42,7 @@ object TextLayoutTest extends TestSuite {
             |Role: Admin
             |Active: Y
             |Suspended: Y
+            |Shared: N
             |Phone: 8335-422-718
             |Email: coffeyrasmussen@flotonic.com
             |Signature: Don't Worry Be Happy!
@@ -65,13 +66,16 @@ object TextLayoutTest extends TestSuite {
             |Role: Admin
             |Active: Y
             |Suspended: Y
+            |Shared: N
             |Phone: 8335-422-718
             |Email: coffeyrasmussen@flotonic.com
             |Signature: Don't Worry Be Happy!
             |Locale: en-au
             |Timezone: Sri Lanka
             |Tags: Springville, Sutton, Hartsville/Hartley, Diaperville""".stripMargin
-        result.mkString("\n") ==> expected
+        result.zip(expected.split("\n")).foreach {
+          case (r, e) => r ==> e
+        }
       }
 
     }
@@ -119,6 +123,7 @@ object TextLayoutTest extends TestSuite {
             |    Role: Agent
             |    Active: N
             |    Suspended: Y
+            |    Shared: Y
             |    Phone: 8364-062-708
             |    Email: georgettecastro@flotonic.com
             |    Signature: Don't Worry Be Happy!
@@ -147,6 +152,7 @@ object TextLayoutTest extends TestSuite {
             |    Role: Agent
             |    Active: N
             |    Suspended: N
+            |    Shared: N
             |    Phone: 9855-882-406
             |    Email: gatescopeland@flotonic.com
             |    Signature: Don't Worry Be Happy!
@@ -168,17 +174,21 @@ object TextLayoutTest extends TestSuite {
             |Due At: Sun, 31 Jul 2016 02:37:50 -1000
             |Via: Web""".stripMargin
 
-        result.mkString("\n") ==> expected
+        result.zip(expected.split("\n")).foreach {
+          case (r, e) => r ==> e
+        }
       }
 
       'minimal - {
-       layoutTicket(
+       val result = layoutTicket(
           Data.tickets.head,
           None,
           None,
           None,
           Data.users(37),
-          None).mkString("\n") ==>
+          None)
+
+         val expected =
             """Id: 436bf9b0-1147-4c0a-8439-6f79833bff5b
               |URL: http://initech.zendesk.com/api/v2/tickets/436bf9b0-1147-4c0a-8439-6f79833bff5b.json
               |External Id: 9210cdc9-4bee-485f-a078-35396cd74063
@@ -201,6 +211,7 @@ object TextLayoutTest extends TestSuite {
               |    Role: Agent
               |    Active: N
               |    Suspended: Y
+              |    Shared: Y
               |    Phone: 8364-062-708
               |    Email: georgettecastro@flotonic.com
               |    Signature: Don't Worry Be Happy!
@@ -213,6 +224,10 @@ object TextLayoutTest extends TestSuite {
               |Has Incidents: N
               |Due At: Sun, 31 Jul 2016 02:37:50 -1000
               |Via: Web""".stripMargin
+
+        expected.split("\n").zip(result) foreach {
+          case (e, r) => r ==> e
+        }
 
       }
     }

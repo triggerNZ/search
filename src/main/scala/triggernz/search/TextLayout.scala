@@ -31,6 +31,7 @@ object TextLayout {
     s"Role: ${role(u.role)}",
     s"Active: ${active(u.active)}",
     s"Suspended: ${suspended(u.suspended)}",
+    s"Shared: ${shared(u.shared)}",
     s"Phone: ${u.phone.value}",
     s"Email: ${u.email.map(_.toString).getOrElse("")}",
     s"Signature: ${u.signature}",
@@ -79,6 +80,11 @@ object TextLayout {
   private def sharedTickets(s: SharedTickets): String = s match {
     case SharedTickets.Enabled => "Y"
     case SharedTickets.Disabled => "N"
+  }
+
+  private def shared(s: ShareStatus): String = s match {
+    case ShareStatus.Shared => "Y"
+    case ShareStatus.Private => "N"
   }
 
   private def suspended(s: SuspendStatus) = s match {
