@@ -8,11 +8,11 @@ import cats.instances.string._
 import org.jline.reader._
 
 case class Repl(
-                 orgStores: Map[String, Store[Id, String, Organization]],
-                 userStores: Map[String, Store[Id, String, User]],
-                 ticketStores: Map[String, Store[Id, String, Ticket]],
-                 userIdStore: Store[Id, UserId, User],
-                 orgIdStore: Store[Id, OrganizationId, Organization],
+                 orgStores: Map[String, Store[String, Organization]],
+                 userStores: Map[String, Store[String, User]],
+                 ticketStores: Map[String, Store[String, Ticket]],
+                 userIdStore: Store[UserId, User],
+                 orgIdStore: Store[OrganizationId, Organization],
                ) {
   object HardcodedDatasets {
     val Tickets = "tickets"

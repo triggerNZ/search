@@ -14,7 +14,7 @@ object TextLayout {
       s"Domain Names: ${org.domainNames.map(_.value).mkString(", ")}",
       s"Tags: ${org.tags.map(_.value).mkString(", ")}",
       s"Created At: ${date(org.createdAt)}",
-      s"Shared Tickets: ${sharedTickets(org.sharedTickets)}",
+      s"Shared Tickets: ${SharedTickets.searchString(org.sharedTickets)}",
     )
 
   def layoutUser(u: User, org: Option[Organization]): List[String] = List(
@@ -28,9 +28,9 @@ object TextLayout {
     s"Organization:"
   ) ++ org.toList.flatMap(o => indent(layoutOrganization(o))) ++ List(
     s"Timezone: ${u.timezone.map(_.name).getOrElse("")}",
-    s"Role: ${role(u.role)}",
-    s"Active: ${active(u.active)}",
-    s"Suspended: ${suspended(u.suspended)}",
+    s"Role: ${Role.searchString(u.role)}",
+    s"Active: ${ActiveStatus.searchString(u.active)}",
+    s"Suspended: ${SuspendStatus.searchString(u.suspended)}",
     s"Shared: ${ShareStatus.searchString(u.shared)}",
     s"Phone: ${u.phone.value}",
     s"Email: ${u.email.map(_.toString).getOrElse("")}",
@@ -63,7 +63,7 @@ object TextLayout {
       "Organization:"
     ) ++ org.toList.flatMap(o => indent(layoutOrganization(o))) ++ List(
       s"Tags: ${t.tags.map(_.value).mkString(", ")}",
-      s"Has Incidents: ${if (t.hasIncidents) "Y" else "N"}",
+      s"Has Incidents: ${YesNo(t.hasIncidents)}",
       s"Due At: ${t.dueAt.map(date).getOrElse("")}",
       s"Via: ${t.via}"
     )
@@ -71,27 +71,6 @@ object TextLayout {
 
   private def date(dt: ZonedDateTime) =
     dt.format(DateTimeFormatter.RFC_1123_DATE_TIME)
-
-  private def active(a: ActiveStatus): String = a match {
-    case ActiveStatus.Active => "Y"
-    case ActiveStatus.Inactive => "N"
-  }
-
-  private def sharedTickets(s: SharedTickets): String = s match {
-    case SharedTickets.Enabled => "Y"
-    case SharedTickets.Disabled => "N"
-  }
-
-  private def suspended(s: SuspendStatus) = s match {
-    case SuspendStatus.Suspended => "Y"
-    case SuspendStatus.NotSuspended => "N"
-  }
-
-  private def role(r: Role) = r match {
-    case Role.Agent => "Agent"
-    case Role.Admin => "Admin"
-    case Role.EndUser => "End User"
-  }
 
 
   private def indent(strs: List[String]): List[String] =

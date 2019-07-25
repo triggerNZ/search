@@ -1,7 +1,5 @@
 package triggernz.search
 
-import cats.Id
-
 
 object App {
   def main(args: Array[String]) = {
@@ -15,7 +13,7 @@ object Stores {
   lazy val orgIdStore = VectorStore(organizations, Queries.Organizations.id)
   lazy val userIdStore =  VectorStore(users, Queries.Users.id)
 
-  val orgStores: Map[String, Store[Id, String, Organization]] =
+  val orgStores: Map[String, Store[String, Organization]] =
     Map(
       "id" -> VectorStore(organizations, Queries.Organizations.idString),
       "url" -> VectorStore(organizations, Queries.Organizations.url),
@@ -28,7 +26,7 @@ object Stores {
       "sharedTickets" -> VectorStore(organizations, Queries.Organizations.sharedTickets),
     )
 
-  val userStores: Map[String, Store[Id, String, User]] =
+  val userStores: Map[String, Store[String, User]] =
     Map(
       "id" -> VectorStore(users, Queries.Users.idString),
       "url" -> VectorStore(users, Queries.Users.url),
@@ -49,9 +47,11 @@ object Stores {
       "tags" -> VectorStore(users, Queries.Users.tags),
       "orgName" -> VectorStore(users, Queries.Users.orgName(orgIdStore)),
       "orgId" -> VectorStore(users, Queries.Users.orgId(orgIdStore)),
+      "role" -> VectorStore(users, Queries.Users.role),
+
     )
 
-  val ticketStores: Map[String, Store[Id, String, Ticket]] =
+  val ticketStores: Map[String, Store[String, Ticket]] =
     Map(
       "id" -> VectorStore(tickets, Queries.Tickets.id),
       "url" -> VectorStore(tickets, Queries.Tickets.url),

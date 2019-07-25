@@ -9,32 +9,27 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.{HashMap => MutHashMap}
 
 
-abstract class Store[F[_], Query, T : UnivEq] {
+abstract class Store[Query, T : UnivEq] {
   type DataLoc
 
-  def lookupOne(q: Query): F[Vector[DataLoc]]
-  def lookupMany(qs: Vector[Query]): F[Vector[DataLoc]]
+  def lookupOne(q: Query): Vector[DataLoc]
+  def lookupMany(qs: Vector[Query]): Vector[DataLoc]
 
-  def retrieveOne(loc: DataLoc): F[Option[T]]
-  def retrieveMany(locs: Vector[DataLoc]): F[Vector[T]]
+  def retrieveOne(loc: DataLoc): Option[T]
+  def retrieveMany(locs: Vector[DataLoc]): Vector[T]
 
-  def lookupAndRetrieve(q: Query)(implicit M: Monad[F]) =
-    for {
-      lookupResult <- lookupOne(q)
-      retrieveResult <- retrieveMany(lookupResult)
-    } yield retrieveResult.distinct  // Distinct here is safe as the number of results is expected to be small
+  def lookupAndRetrieve(q: Query) =
+    retrieveMany(lookupOne(q)).distinct  // Distinct here is safe as the number of results is expected to be small
 
-  def lookupAndRetrieveMany(qs: Vector[Query])(implicit M: Monad[F]) =
-    for {
-      lookupResults <- lookupMany(qs)
-      retrieveResult <- retrieveMany(lookupResults)
-    } yield retrieveResult.distinct // Distinct here is safe as the number of results is expected to be small
+  def lookupAndRetrieveMany(qs: Vector[Query]) =
+    retrieveMany(lookupMany(qs)).distinct
+
 }
 
 object Store {
 }
 
-class VectorStore[T: UnivEq, Q: UnivEq] private (vec: Vector[T], index: HashMap[Q, Vector[Int]]) extends Store[Id, Q, T] {
+class VectorStore[T: UnivEq, Q: UnivEq] private (vec: Vector[T], index: HashMap[Q, Vector[Int]]) extends Store[Q, T] {
   type DataLoc = Int
 
   def lookupOne(q: Q) = index.getOrElse(q, Vector.empty)
@@ -52,15 +47,15 @@ class VectorStore[T: UnivEq, Q: UnivEq] private (vec: Vector[T], index: HashMap[
 
 object VectorStore {
   // Convenience method from tests
-  def apply[T: UnivEq, Q: UnivEq](v: Vector[T], queries: IndexGen[Id, T, Q]*): VectorStore[T, Q] =
+  def apply[T: UnivEq, Q: UnivEq](v: Vector[T], queries: IndexGen[T, Q]*): VectorStore[T, Q] =
     build(v, queries.toVector)
 
-  def build[T: UnivEq, Q: UnivEq](v: Vector[T], queries: Vector[IndexGen[Id, T, Q]]) = new VectorStore[T, Q](
+  def build[T: UnivEq, Q: UnivEq](v: Vector[T], queries: Vector[IndexGen[T, Q]]) = new VectorStore[T, Q](
     v,
     buildIndex(v, queries)
   )
 
-  private def buildIndex[T, Q](v: Vector[T], queries: Vector[IndexGen[Id, T, Q]]): HashMap[Q, Vector[Int]] = {
+  private def buildIndex[T, Q](v: Vector[T], queries: Vector[IndexGen[T, Q]]): HashMap[Q, Vector[Int]] = {
     // Two traversals. One to build the map, one to make it immutable. We could do it with one
     // by passing the mutable map around but that breaks referential transparency.
     var mutableMap = MutHashMap.empty[Q, Vector[Int]]
@@ -78,27 +73,25 @@ object VectorStore {
   }
 }
 
-sealed trait IndexGen[F[_], T, Q] {
-  def apply(t: T): F[Vector[Q]]
+sealed trait IndexGen[T, Q] {
+  def apply(t: T): Vector[Q]
 }
 object IndexGen {
-  def many[T, Q](getter: T => Vector[Q]): IndexGen[Id, T, Q] =
-    Direct[Id, T, Q](getter)
+  def many[T, Q](getter: T => Vector[Q]): IndexGen[T, Q] =
+    Direct[T, Q](getter)
 
-  def apply[T, Q](getter: T => Q): IndexGen[Id, T, Q] =
-    Direct[Id, T, Q](t => Vector(getter(t)))
+  def apply[T, Q](getter: T => Q): IndexGen[T, Q] =
+    Direct[T, Q](t => Vector(getter(t)))
 
-  case class Direct[F[_]: Monad, T, Q](getter: T => Vector[Q]) extends IndexGen[F, T, Q] {
-    def apply(t: T) = Monad[F].pure(getter(t))
+  case class Direct[T, Q](getter: T => Vector[Q]) extends IndexGen[T, Q] {
+    def apply(t: T) = getter(t)
   }
-  case class Join[F[_]: Monad, T, S, Q, PQ](parentGetter: T => Vector[PQ], childGetter: S => Vector[Q], childStore: Store[F, PQ, S])
-    extends IndexGen[F, T, Q]{
+  case class Join[T, S, Q, PQ](parentGetter: T => Vector[PQ], childGetter: S => Vector[Q], childStore: Store[PQ, S])
+    extends IndexGen[T, Q]{
     def apply(t: T) = {
       val parentQs: Vector[PQ] = parentGetter(t)
-      val childrenF = childStore.lookupAndRetrieveMany(parentQs)
-      childrenF.map { children =>
-         children.flatMap(childGetter)
-      }
+      val children = childStore.lookupAndRetrieveMany(parentQs)
+      children.flatMap(childGetter)
     }
 
   }

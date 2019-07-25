@@ -43,6 +43,11 @@ object ActiveStatus {
   case object Inactive extends ActiveStatus
 
   implicit def univEq: UnivEq[ActiveStatus] = UnivEq.derive
+
+  def searchString(active: ActiveStatus) = active match {
+    case ActiveStatus.Active => "Y"
+    case ActiveStatus.Inactive => "N"
+  }
 }
 
 sealed trait VerificationStatus
@@ -51,6 +56,11 @@ object VerificationStatus {
   case object Unverified extends VerificationStatus
 
   implicit def univEq: UnivEq[VerificationStatus] = UnivEq.derive
+
+  def searchString(vs: VerificationStatus) = vs match {
+    case VerificationStatus.Verified => "Y"
+    case VerificationStatus.Unverified => "N"
+  }
 }
 
 sealed trait ShareStatus
@@ -71,6 +81,11 @@ object SuspendStatus {
   case object Suspended extends SuspendStatus
   case object NotSuspended extends SuspendStatus
 
+  def searchString(ss: SuspendStatus) = ss match {
+    case SuspendStatus.Suspended => "Y"
+    case SuspendStatus.NotSuspended => "N"
+  }
+
   implicit def univEq: UnivEq[SuspendStatus] = UnivEq.derive
 }
 
@@ -86,6 +101,12 @@ object Role {
   case object Agent extends Role
 
   implicit def univEq: UnivEq[Role] = UnivEq.derive
+
+  def searchString(r: Role) = r match {
+    case Role.Agent => "Agent"
+    case Role.Admin => "Admin"
+    case Role.EndUser => "End User"
+  }
 }
 
 case class Timezone(name: String) extends AnyVal

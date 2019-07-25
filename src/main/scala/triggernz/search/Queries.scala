@@ -18,10 +18,7 @@ object Queries {
     val domainNames = IndexGen.many((o: Organization) => o.domainNames.map(_.value))
     val createdAt = IndexGen.many((o: Organization) => date(o.createdAt))
     val details = IndexGen((o: Organization) => o.details)
-    val sharedTickets = IndexGen((o: Organization) => o.sharedTickets match {
-      case SharedTickets.Enabled => "Y"
-      case SharedTickets.Disabled => "N"
-    })
+    val sharedTickets = IndexGen((o: Organization) => SharedTickets.searchString(o.sharedTickets))
     val tags = IndexGen.many((o: Organization) => o.tags.map(_.value))
   }
 
@@ -32,14 +29,8 @@ object Queries {
     val externalId = IndexGen((u: User) => u.externalId.value.toString)
     val createdAt = IndexGen.many((u: User) => date(u.createdAt))
     val lastLoginAt = IndexGen.many((u: User) => date(u.lastLoginAt))
-    val active = IndexGen((u: User) => u.active match {
-      case ActiveStatus.Active => "Y"
-      case ActiveStatus.Inactive => "N"
-    })
-    val verified = IndexGen((u: User) => u.verified.map {
-      case VerificationStatus.Verified => "Y"
-      case VerificationStatus.Unverified => "N"
-    }.getOrElse(""))
+    val active = IndexGen((u: User) => ActiveStatus.searchString(u.active))
+    val verified = IndexGen((u: User) => u.verified.map(VerificationStatus.searchString).getOrElse(""))
 
     val shared = IndexGen((u: User) => ShareStatus.searchString(u.shared))
     val locale = IndexGen((u: User) => u.locale.map(_.toString).getOrElse(""))
@@ -49,16 +40,17 @@ object Queries {
     val alias = IndexGen((u: User) => u.alias.getOrElse(""))
     val signature = IndexGen((u: User) => u.signature)
     val tags = IndexGen.many((u: User) => u.tags.map(_.value))
+    val role = IndexGen((u: User) => Role.searchString(u.role))
 
     val timezone = IndexGen((u: User) => u.timezone.map(_.name).getOrElse(""))
-    def orgName(orgStore: Store[Id, OrganizationId, Organization]) =
+    def orgName(orgStore: Store[OrganizationId, Organization]) =
       IndexGen.Join(
         (u: User) => u.organizationId.toVector,
         (o: Organization) => Vector(o.name),
         orgStore
       )
 
-    def orgId(orgStore: Store[Id, OrganizationId, Organization]) =
+    def orgId(orgStore: Store[OrganizationId, Organization]) =
       IndexGen.Join(
         (u: User) => u.organizationId.toVector,
         (o: Organization) => Vector(o.id.value.toString),
@@ -81,54 +73,51 @@ object Queries {
     val priority = IndexGen((t: Ticket) => t.priority.toString)
     val status = IndexGen((t: Ticket) => t.status.toString)
 
-    def assigneeId(userStore: Store[Id, UserId, User]) =
+    def assigneeId(userStore: Store[UserId, User]) =
       IndexGen.Join(
         (t: Ticket) => t.assigneeId.toVector,
         (u: User) => Vector(u.id.value.toString),
         userStore
       )
-    def assigneeName(userStore: Store[Id, UserId, User]) =
+    def assigneeName(userStore: Store[UserId, User]) =
       IndexGen.Join(
         (t: Ticket) => t.assigneeId.toVector,
         (u: User) => Vector(u.name) ++ u.alias.toVector,
         userStore
       )
 
-    def submitterId(userStore: Store[Id, UserId, User]) =
+    def submitterId(userStore: Store[UserId, User]) =
       IndexGen.Join(
         (t: Ticket) => Vector(t.submitterId),
         (u: User) => Vector(u.id.value.toString),
         userStore
       )
 
-    def submitterName(userStore: Store[Id, UserId, User]) =
+    def submitterName(userStore: Store[UserId, User]) =
       IndexGen.Join(
         (t: Ticket) => Vector(t.submitterId),
         (u: User) => Vector(u.name) ++ u.alias.toVector,
         userStore
       )
 
-    def orgId(orgStore: Store[Id, OrganizationId, Organization]) =
+    def orgId(orgStore: Store[OrganizationId, Organization]) =
       IndexGen.Join(
         (t: Ticket) => t.organizationId.toVector,
         (o: Organization) => Vector(o.id.value.toString),
         orgStore
       )
 
-    def orgName(orgStore: Store[Id, OrganizationId, Organization]) =
+    def orgName(orgStore: Store[OrganizationId, Organization]) =
       IndexGen.Join(
         (t: Ticket) => t.organizationId.toVector,
         (o: Organization) => Vector(o.name),
         orgStore
       )
 
-    def userName(userStore: Store[Id, UserId, User]) =
+    def userName(userStore: Store[UserId, User]) =
       Vector(submitterName(userStore), assigneeName(userStore))
 
-    val hasIncidents = IndexGen((t: Ticket) => t.hasIncidents match {
-      case true => "Y"
-      case false => "F"
-    })
+    val hasIncidents = IndexGen((t: Ticket) => YesNo(t.hasIncidents))
 
     val via = IndexGen((t: Ticket) => t.via.toString)
   }

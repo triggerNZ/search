@@ -42,6 +42,11 @@ object SharedTickets {
   case object Disabled extends SharedTickets
 
   implicit def univEq: UnivEq[SharedTickets] = UnivEq.derive
+
+  def searchString(st: SharedTickets) = st match {
+    case SharedTickets.Enabled => "Y"
+    case SharedTickets.Disabled => "N"
+  }
 }
 
 case class Tag(value: String) extends AnyVal
