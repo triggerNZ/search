@@ -102,8 +102,8 @@ case class Repl(
                     val organization = ticket.organizationId.flatMap(id => orgIdStore.lookupAndRetrieve(id).headOption)
                     val assignee = ticket.assigneeId.flatMap(u => userIdStore.lookupAndRetrieve(u).headOption)
                     val assigneeOrg = assignee.flatMap(_.organizationId).flatMap(id => orgIdStore.lookupAndRetrieve(id).headOption)
-                    val submitter = userIdStore.lookupAndRetrieve(ticket.submitterId).head //TODO: unsafe
-                    val submitterOrg = submitter.organizationId.flatMap(id => orgIdStore.lookupAndRetrieve(id).headOption)
+                    val submitter = userIdStore.lookupAndRetrieve(ticket.submitterId).headOption
+                    val submitterOrg = submitter.flatMap(_.organizationId).flatMap(id => orgIdStore.lookupAndRetrieve(id).headOption)
                     (ticket, organization, assignee, assigneeOrg, submitter, submitterOrg)
                   }
                   outputResult(reader, ticketWithEverything, (TextLayout.layoutTicket _).tupled)
