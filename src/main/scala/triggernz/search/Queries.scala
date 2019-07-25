@@ -7,7 +7,7 @@ import cats.Id
 
 object Queries {
   private def date(d: ZonedDateTime) =
-    Vector(d.format(DateTimeFormatter.ISO_DATE_TIME), d.format(DateTimeFormatter.RFC_1123_DATE_TIME))
+    Vector(d.format(DateTimeFormatter.ISO_DATE_TIME), d.format(DateTimeFormatter.RFC_1123_DATE_TIME), d.format(Decoders.DateTimeFormat))
 
   object Organizations {
     val id =  IndexGen((o: Organization) => o.id)
@@ -31,7 +31,7 @@ object Queries {
     val lastLoginAt = IndexGen.many((u: User) => date(u.lastLoginAt))
     val active = IndexGen((u: User) => ActiveStatus.searchString(u.active))
     val verified = IndexGen((u: User) => u.verified.map(VerificationStatus.searchString).getOrElse(""))
-
+    val suspended = IndexGen((u: User) => SuspendStatus.searchString(u.suspended))
     val shared = IndexGen((u: User) => ShareStatus.searchString(u.shared))
     val locale = IndexGen((u: User) => u.locale.map(_.toString).getOrElse(""))
     val name = IndexGen((u: User) => u.name)
@@ -40,7 +40,10 @@ object Queries {
     val alias = IndexGen((u: User) => u.alias.getOrElse(""))
     val signature = IndexGen((u: User) => u.signature)
     val tags = IndexGen.many((u: User) => u.tags.map(_.value))
-    val role = IndexGen((u: User) => Role.searchString(u.role))
+    val role = IndexGen.many((u: User) => {
+      val str = Role.searchString(u.role)
+      Vector(str, str.toLowerCase(), str.toLowerCase().replace(' ', '-'))
+    })
 
     val timezone = IndexGen((u: User) => u.timezone.map(_.name).getOrElse(""))
     def orgName(orgStore: Store[OrganizationId, Organization]) =
@@ -64,14 +67,23 @@ object Queries {
     val externalId = IndexGen((t: Ticket) => t.externalId.value.toString)
     val createdAt = IndexGen.many((t: Ticket) => date(t.createdAt))
     val dueAt = IndexGen.many((t: Ticket) => t.dueAt.toVector.flatMap(date))
-    val ticketType = IndexGen((t: Ticket) => t.ticketType.map(_.toString).getOrElse(""))
+    val ticketType = IndexGen.many { (t: Ticket) =>
+      val str = t.ticketType.map(_.toString).getOrElse("")
+      Vector(str, str.toLowerCase()).distinct
+    }
     val subject = IndexGen((t: Ticket) => t.subject)
     val subjectWords = IndexGen.many((t: Ticket) => t.subject.split("[., ]+").toVector.map(_.toLowerCase))
     val description = IndexGen((t: Ticket) => t.description.getOrElse(""))
     val descriptionWords = IndexGen.many((t: Ticket) => t.description.toVector.flatMap(_.split("[., ]+")).map(_.toLowerCase))
     val tags = IndexGen.many((t: Ticket) => t.tags.map(_.value))
-    val priority = IndexGen((t: Ticket) => t.priority.toString)
-    val status = IndexGen((t: Ticket) => t.status.toString)
+    val priority = IndexGen.many { (t: Ticket) =>
+      val str = t.priority.toString
+      Vector(str, str.toLowerCase())
+    }
+    val status = IndexGen.many {(t: Ticket) =>
+      val str = t.status.toString
+      Vector(str, str.toLowerCase)
+    }
 
     def assigneeId(userStore: Store[UserId, User]) =
       IndexGen.Join(
@@ -119,7 +131,11 @@ object Queries {
 
     val hasIncidents = IndexGen((t: Ticket) => YesNo(t.hasIncidents))
 
-    val via = IndexGen((t: Ticket) => t.via.toString)
+    val via = IndexGen.many {(t: Ticket) =>
+      val str = t.via.toString
+      Vector(str, str.toLowerCase())
+
+    }
   }
 
 }

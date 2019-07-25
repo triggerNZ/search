@@ -8,12 +8,17 @@ import java.util.{Locale, UUID}
 import io.circe.Decoder
 
 import scala.util.Try
-
 import cats.instances.either._
 import cats.syntax.option._
 
 
 object Decoders {
+  val DateTimeFormat = new DateTimeFormatterBuilder()
+    .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+    .appendLiteral(' ')
+    .appendOffsetId()
+    .toFormatter()
+
   implicit val decodeOrganizationId: Decoder[OrganizationId] =
     Decoder.decodeLong.map(OrganizationId.apply)
 
@@ -43,13 +48,7 @@ object Decoders {
     Decoder.decodeString.map(Tag.apply)
 
   implicit val decodeZonedDateTime: Decoder[ZonedDateTime] =
-    Decoder.decodeZonedDateTimeWithFormatter {
-      new DateTimeFormatterBuilder()
-        .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        .appendLiteral(' ')
-        .appendOffsetId()
-        .toFormatter()
-    }
+    Decoder.decodeZonedDateTimeWithFormatter(DateTimeFormat)
 
   implicit val decodeOrganization: Decoder[Organization] =
     Decoder.forProduct9(

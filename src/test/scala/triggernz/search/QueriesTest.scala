@@ -46,8 +46,13 @@ object QueriesTest extends TestSuite {
         val store = VectorStore(tickets, Queries.Tickets.subject, Queries.Tickets.tags)
 
         store.lookupAndRetrieveMany(Vector("A Catastrophe in Hungary")) ==> Vector(tickets(2))
-        val result = store.lookupAndRetrieveMany(Vector("Hawaii")).length ==> 14
+        store.lookupAndRetrieveMany(Vector("Hawaii")).length ==> 14
+      }
 
+      'submitterId - {
+        val userStore = VectorStore(users, Queries.Users.id)
+        val store = VectorStore(tickets, Queries.Tickets.submitterId(userStore))
+        store.lookupOne("555")
       }
     }
   }

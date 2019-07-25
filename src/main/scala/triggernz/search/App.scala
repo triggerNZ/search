@@ -48,6 +48,7 @@ object Stores {
       "orgName" -> VectorStore(users, Queries.Users.orgName(orgIdStore)),
       "orgId" -> VectorStore(users, Queries.Users.orgId(orgIdStore)),
       "role" -> VectorStore(users, Queries.Users.role),
+      "suspended" -> VectorStore(users, Queries.Users.suspended)
 
     )
 
@@ -60,8 +61,8 @@ object Stores {
       "dueAt" -> VectorStore(tickets, Queries.Tickets.dueAt),
       "subject" -> VectorStore(tickets, Queries.Tickets.subject),
       "subjectWords" -> VectorStore(tickets, Queries.Tickets.subjectWords),
-      "description" -> VectorStore(tickets, Queries.Tickets.subject),
-      "descriptionWords" -> VectorStore(tickets, Queries.Tickets.subjectWords),
+      "description" -> VectorStore(tickets, Queries.Tickets.description),
+      "descriptionWords" -> VectorStore(tickets, Queries.Tickets.descriptionWords),
       "tags" -> VectorStore(tickets, Queries.Tickets.tags),
       "priority" -> VectorStore(tickets, Queries.Tickets.priority),
       "status" -> VectorStore(tickets, Queries.Tickets.status),
