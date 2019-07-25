@@ -125,3 +125,15 @@ alias.
 This approach could just as well extend to building indices from large random access files without taking all the data 
 into memory. As long as the indices fit into memory, we could access much larger volumes of data. However, this wasn't 
 implemented due to limited time in implementing this project.
+
+### Test strategy
+
+Utest was used as the testing library. Most of the tests rely on the example data to verify real-life queries. A notable test
+is `SearchByEveryFieldTest` which verifies that every field in each json example can be found in one of the indices. 
+This flushed out a lot of bugs.
+
+To run the tests:
+
+```
+sbt test
+```
